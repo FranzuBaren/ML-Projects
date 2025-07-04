@@ -26,8 +26,9 @@ This page provides a **comprehensive experiment protocol** and **theoretical bac
 4. [Implementation Guidelines](#implementation-guidelines)
 5. [Interpreting the Results](#interpreting-the-results)
 6. [Common Pitfalls & Best Practices](#common-pitfalls--best-practices)
-7. [Example Experiment](#example-experiment)
-8. [References](#references)
+7. [Recent Advances in Permutation Feature Importance](#recent-advances-in-permutation-feature-importance)
+8. [Example Experiment](#example-experiment)
+9. [References](#references)
 
 ---
 
@@ -130,3 +131,4 @@ plt.yticks(range(len(sorted_idx)), [X_test.columns[i] for i in sorted_idx])
 plt.xlabel("Permutation Importance")
 plt.title("Feature Importance (Permutation)")
 plt.show()
+
