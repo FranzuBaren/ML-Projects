@@ -158,5 +158,66 @@ Compared with alternatives, PFI offers a favorable balance of interpretability, 
 6. [Lundberg, S. M., & Lee, S.-I. (2017). A Unified Approach to Interpreting Model Predictions. *Advances in Neural Information Processing Systems*, 30, 4765–4774.](https://papers.nips.cc/paper/2017/file/8a20a8621978632d76c43dfd28b67767-Paper.pdf)  
 
 ---
+## Experiment inspired by a recent paper [(Liu et al., 2025)](https://arxiv.org/abs/2505.11601)
+
+### Methodology Overview
+
+This experiment is inspired by the breakthrough methodology proposed in "Permutation-Invariant Embedding and Policy-Guided Search" [(Liu et al., 2025)](https://arxiv.org/abs/2505.11601). The core innovation lies in addressing two fundamental limitations of previous feature selection methods:
+
+1. **Permutation Sensitivity**: Traditional embedding approaches are sensitive to the order of features, introducing bias and reducing effectiveness.
+2. **Convexity Assumptions**: Gradient-based search strategies assume convexity in the embedding space, which rarely holds, leading to suboptimal solutions.
+
+To overcome these, the authors propose the CAPS framework, which integrates permutation-invariant embeddings with a policy-guided reinforcement learning (RL) search.
+
+#### Permutation-Invariant Embedding
+
+- **Encoder-Decoder Structure**: The encoder maps feature subsets into a continuous embedding space by modeling pairwise relationships among feature indices, ensuring that permutations of the same subset yield identical embeddings.
+- **Self-Attention Mechanism**: Utilizes Multihead Attention Blocks (MAB) without positional encoding, focusing on feature relationships rather than order.
+- **Inducing Points**: Introduces a set of inducing points to reduce the computational complexity of pairwise attention from $O(N^2)$ to $O(NM)$, where $M \ll N$.
+
+The encoder is formally defined as:
+$
+\text{MAB}(Q, K, V) = \text{LayerNorm}(H + rFF(H))
+$
+$
+H = \text{LayerNorm}(Q + \text{Multihead}(Q, K, V; W))
+$
+
+The Induced Set Attention Block (ISAB) further refines this:
+$
+\text{ISAB}_M(f) = \text{MAB}(f, H, H)
+$
+$
+H = \text{MAB}(I, f, f)
+$
+where $I$ are the learned inducing points.
+
+#### Policy-Guided Search
+
+- **Reinforcement Learning Agent**: After training the embedding, a policy-based RL agent explores the embedding space to optimize two objectives:
+  - Maximize downstream task performance.
+  - Minimize the length of the selected feature subset.
+- **Search Process**: The RL agent starts from top-K high-performing subsets, encodes them, and iteratively updates embeddings to discover better feature subsets, overcoming non-convexity challenges.
+
+The optimization target is:
+$
+f^* = \psi(E^*) = \arg\max_{E \in \mathcal{E}} M(X[\psi(E)])
+$
+where $\psi$ is the decoder, $E^*$ is the optimal embedding, and $M$ is the downstream model performance.
+
+### Expected Results
+
+Based on the methodology, we expect the following outcomes:
+
+- **Superior Feature Selection**: The permutation-invariant embedding ensures that the model captures true feature interactions without order bias, leading to more robust and generalizable feature subsets.
+- **Efficient Search**: The policy-guided RL search efficiently navigates the complex, non-convex embedding space, reducing the risk of local optima and identifying higher-performing feature subsets.
+- **Scalability**: The use of inducing points allows the method to scale to high-dimensional datasets without prohibitive computational costs.
+- **Empirical Validation**: As demonstrated in the original paper, extensive experiments on 14 real-world datasets show that CAPS outperforms state-of-the-art feature selection methods in terms of effectiveness, efficiency, and robustness.
+
+---
+
+**Reference**:  
+[Liu, R., Xie, R., Yao, Z., Fu, Y., & Wang, D. (2025). Permutation-Invariant Embedding and Policy-Guided Search. arXiv:2505.11601](https://arxiv.org/abs/2505.11601)
+
 
 
