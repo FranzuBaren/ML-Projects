@@ -44,9 +44,9 @@ The process to compute the permutation feature importance $I_j$ for feature $X_j
 1. **Baseline performance:**  
    Evaluate the model on the unaltered test data to get baseline performance
 
-   $$
+   $
    M_{\text{baseline}} = M\big(f(X), y\big)
-   $$
+   $
 
 2. **Permutation step:**  
    Create a permuted dataset $X_{\text{perm}}^{(j)}$ by randomly shuffling the values of the $j$-th feature column, breaking its relationship with $y$ while keeping other features intact.
@@ -54,25 +54,25 @@ The process to compute the permutation feature importance $I_j$ for feature $X_j
 3. **Evaluate permuted performance:**  
    Compute performance on the permuted dataset
 
-   $$
+   $
    M_{\text{perm}(j)} = M\big(f(X_{\text{perm}}^{(j)}), y\big)
-   $$
+   $
 
 4. **Calculate importance:**  
    The importance of feature $j$ is the change in performance caused by permutation:
 
-   $$
+   $
    I_j = M_{\text{perm}(j)} - M_{\text{baseline}}
-   $$
+   $
 
 Interpretation depends on the metric:
 
 - For **error metrics** (e.g., mean squared error, log-loss), a **positive** $I_j$ indicates that permuting $X_j$ increased error, so $X_j$ is important.
 - For **score metrics** (e.g., accuracy, AUC), it is common to reverse the sign:
 
-  $$
+  $
   I_j = M_{\text{baseline}} - M_{\text{perm}(j)}
-  $$
+  $
 
 so that **higher positive values** denote more important features.
 
