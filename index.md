@@ -12,9 +12,9 @@ _By Francesco Orsi_
 
 ## Overview
 
-Permutation Feature Importance (PFI) is a widely adopted, model-agnostic technique for quantifying the importance of input features to a predictive model. It provides insights into which features most influence a model’s predictions by observing the degradation in performance when a feature's values are randomly shuffled.
+Permutation Feature Importance (PFI) is a model-agnostic approach for quantifying how much each input feature contributes to a predictive model’s performance. It works by randomly shuffling a feature's values and measuring the degradation in the model's performance.
 
-This guide provides a **detailed, reproducible experiment protocol** for computing and interpreting Permutation Feature Importance, suitable for practitioners and researchers aiming for robust model explainability.
+This page provides a **comprehensive experiment protocol** and **theoretical background** to help you implement and interpret Permutation Feature Importance results accurately.
 
 ---
 
@@ -33,85 +33,47 @@ This guide provides a **detailed, reproducible experiment protocol** for computi
 
 ## Introduction
 
-Feature importance methods help to demystify complex machine learning models, making them interpretable. Permutation Feature Importance works by **breaking the relationship** between a feature and the target variable, observing how model performance drops as a result.
+PFI quantifies the importance of a feature by **breaking its relationship with the target** and observing how the model's predictive performance changes.
 
-**Key characteristics of PFI:**
-- Model-agnostic: Works with any predictive model.
-- Easy to implement.
-- Provides quantitative importance scores.
-- Measures **global importance** (averaged across the dataset).
+**Advantages:**
+- Model-agnostic
+- Simple to implement
+- Works with any performance metric
+- Provides a global view of feature importance across the whole dataset
 
 ---
 
 ## Mathematical Background
 
 Let:
-- \( f \) be the predictive model.
-- \( X \) the dataset of input features.
-- \( y \) the target vector.
-- \( M \) a performance metric (e.g., accuracy, RMSE, F1 score).
+- \( f \) be a predictive model,
+- \( X \) be the input dataset,
+- \( y \) be the target variable,
+- \( M \) be a performance metric such as accuracy, RMSE, or F1 score.
 
-### Steps:
-1. **Compute the baseline performance:**
-   \[
-   M_{baseline} = M(f(X), y)
-   \]
+### Baseline Performance
 
-2. **For each feature \( X_j \):**
-   - Shuffle its values to break its correlation with \( y \), creating \( X_{perm(j)} \).
-   - Evaluate model performance:
-     \[
-     M_{perm(j)} = M(f(X_{perm(j)}), y)
-     \]
-   - The feature importance is computed as:
-     \[
-     I_j = M_{perm(j)} - M_{baseline}
-     \]
-   - For loss functions, importance is typically the **increase in error**. For scoring functions, it's the **decrease in score**.
+Compute the baseline performance of the model on the unshuffled data:
 
----
+$$
+M_{\text{baseline}} = M(f(X), y)
+$$
 
-## Experimental Setup
+### Feature-wise Importance
 
-### 1. **Data Preparation**
-   - Use a representative and clean test set.
-   - Ensure feature types (categorical, numerical) are properly encoded.
-   - Normalize if required by your model.
+For each feature \( X_j \):
+1. Randomly shuffle \( X_j \) to destroy its association with \( y \), producing a new dataset \( X^{(j)}_{\text{perm}} \).
+2. Compute the model performance on the permuted dataset:
 
-### 2. **Model Selection**
-   - Train your predictive model on the training set.
-   - Freeze the trained model during the PFI calculation.
+$$
+M_{\text{perm}(j)} = M(f(X^{(j)}_{\text{perm}}), y)
+$$
 
-### 3. **Performance Metric**
-   - Select a metric suitable for your task:
-     - Classification: Accuracy, F1, ROC AUC.
-     - Regression: RMSE, MAE, \( R^2 \).
+3. Calculate the importance of \( X_j \) as the difference:
 
-### 4. **Repetition and Averaging**
-   - Repeat the permutation and evaluation process \( N \) times to account for randomness.
-   - Average the importance scores over repetitions.
+$$
+I_j = M_{\text{perm}(j)} - M_{\text{baseline}}
+$$
 
----
+- If \( M \) is a **loss** (e.g., RMSE), a **positive \( I_j \)** i**_**
 
-## Implementation Guidelines
-
-### Python Example (Scikit-learn)
-
-```python
-from sklearn.inspection import permutation_importance
-import matplotlib.pyplot as plt
-
-# Assume model, X_test, y_test are predefined
-
-result = permutation_importance(model, X_test, y_test,
-                                scoring='accuracy', n_repeats=10,
-                                random_state=42, n_jobs=-1)
-
-# Plotting
-sorted_idx = result.importances_mean.argsort()
-
-plt.barh(range(len(sorted_idx)), result.importances_mean[sorted_idx])
-plt.yticks(range(len(sorted_idx)), [X_test.columns[i] for i in sorted_idx])
-plt.xlabel("Permutation Importance")
-plt.title("Feature Importance (Permutation)")
-plt.show()
